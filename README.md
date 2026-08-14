@@ -35,11 +35,9 @@ npm run diy
 **① 应用名** — 例如 `我的AI助手`、`My DSH`
 - 会显示在：窗口标题栏、开始菜单/桌面快捷方式、安装包文件名、"关于"对话框
 - 支持中英文、空格
+- 版本号不支持自定义，固定为 `0.1.0`
 
-**② 版本号** — 遵循 `x.y.z` 格式，例如 `1.0.0`
-- 会显示在"关于"对话框和安装包文件名
-
-**③ 图标路径** — **直接回车会弹出文件选择框**，选一张图片即可；也可以直接输入路径。**要求是严格的**，不符合会报错中止：
+**② 图标路径** — **直接回车会弹出文件选择框**，选一张图片即可；也可以直接输入路径。**要求是严格的**，不符合会报错中止：
 
 | 格式 | 要求 | 用途 |
 |---|---|---|
@@ -53,13 +51,13 @@ npm run diy
 也可以一行命令完成（适合脚本/CI）：
 >
 ```bash
-npm run diy -- --name "My DSH" --version 1.0.0 --icon C:\path\icon.png
+npm run diy -- --name "My DSH" --icon C:\path\icon.png
 ```
 
 向导完成时会输出：
 
 ```
-✅ 完成！已写入：应用名=My DSH，版本=1.0.0
+✅ 完成！已写入：应用名=My DSH
 ```
 
 ### 第 3 步：运行或打包
@@ -137,7 +135,8 @@ dsh-desktop/
 [DeepSeek Harness](https://github.com/deepseek-ai/deepseek-harness) web UI —
 tired of closing the browser tab and killing the service with it, or of typing
 startup commands every time? Get the source via terminal, personalize your own
-app (name / version / icon), and build it — or just run it without packaging.
+app (name / icon — version is fixed at 0.1.0), and build it — or just run it
+without packaging.
 
 **Install & personalize:**
 
@@ -145,7 +144,7 @@ app (name / version / icon), and build it — or just run it without packaging.
 git clone git@github.com:Weisifengbuxi/dsh-desktop.git
 cd dsh-desktop
 npm install
-npm run diy            # wizard: app name / version / icon
+npm run diy            # wizard: app name / icon
 npm start              # run in dev mode (no packaging needed)
 npm run dist           # build NSIS installer into release/
 npm run dist:portable  # build portable exe into release/

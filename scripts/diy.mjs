@@ -1,9 +1,9 @@
 // scripts/diy.mjs — DIY 个性化向导
-// 自定义应用名 / 版本号 / 图标，改完即可 `npm start` 体验或 `npm run dist` 打包成自己的 exe。
+// 自定义应用名 / 图标（版本号固定 0.1.0，不支持自定义），改完即可 `npm start` 体验或 `npm run dist` 打包成自己的 exe。
 //
 // 用法：
 //   npm run diy                                        # 交互式提问
-//   npm run diy -- --name "My App" --version 1.0.0 --icon C:\path\icon.png   # 非交互
+//   npm run diy -- --name "My App" --icon C:\path\icon.png   # 非交互
 //
 // 图标要求（严格校验，不满足直接报错中止）：
 //   PNG：正方形，边长 256~1024px（推荐 512），建议透明背景
@@ -110,23 +110,20 @@ function validateIcon(src) {
 
 const argv = process.argv.slice(2);
 const flagName = getFlag("--name", argv);
-const flagVersion = getFlag("--version", argv);
 const flagIcon = getFlag("--icon", argv);
 // 只要给了任意 flag 就视为非交互模式，缺失项用当前配置
-const interactive = !flagName && !flagVersion && !flagIcon;
+const interactive = !flagName && !flagIcon;
 
 const rl = createInterface({ input: stdin, output: stdout });
 const ask = async (q) => (await rl.question(q)).trim();
 
 const pkg = readPkg();
 const currentName = pkg.build?.productName ?? "DeepSeek Harness";
-const currentVersion = pkg.version ?? "0.1.0";
 
 console.log("\n=== DeepSeek Harness Desktop DIY 向导 ===\n");
-console.log(`当前配置：应用名=${currentName}，版本=${currentVersion}\n`);
+console.log(`当前配置：应用名=${currentName}\n`);
 
 const name = flagName ?? ((await ask(`应用名（窗口标题 / 快捷方式名）[${currentName}]: `)) || currentName);
-const version = flagVersion ?? ((await ask(`版本号（x.y.z）[${currentVersion}]: `)) || currentVersion);
 let iconInput = flagIcon;
 if (iconInput === undefined && interactive) {
   const ans = await ask(
@@ -166,7 +163,6 @@ if (icon?.kind === "png") {
 }
 
 // ---------- 写入配置 ----------
-pkg.version = version;
 pkg.build = pkg.build ?? {};
 pkg.build.productName = name;
 pkg.build.win = pkg.build.win ?? {};
@@ -174,7 +170,7 @@ pkg.build.nsis = pkg.build.nsis ?? {};
 pkg.build.nsis.shortcutName = name;
 writeFileSync(PKG_PATH, JSON.stringify(pkg, null, 2) + "\n");
 
-console.log(`\n✅ 完成！已写入：应用名=${name}，版本=${version}`);
+console.log(`\n✅ 完成！已写入：应用名=${name}`);
 console.log("\n下一步：");
 console.log("  npm start              # 直接体验（弹出应用窗口）");
 console.log("  npm run dist           # 打包成安装版 exe（release/）");
