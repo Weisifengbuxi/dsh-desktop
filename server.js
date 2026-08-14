@@ -104,6 +104,30 @@ export async function buildSpawnSpec(port, extraArgs = []) {
   return { command: "npx", args: ["--yes", "@deepseek-ai/dsh", ...base], shell: false, viaShell: false, killPattern: pattern };
 }
 
+/**
+ * 探测是否已有 dsh web 实例在运行（复用检测，避免两个实例并发写同一会话导致日志损坏）。
+ * 命中条件：目标地址返回 200，且首页包含 dsh 注入的引导标记 __DSH_BOOT__。
+ * @returns 命中时返回完整 URL，否则 null。
+ */
+export async function detectExistingServer({ host = "127.0.0.1", port = "3080", timeoutMs = 1200 } = {}) {
+  const url = `http://${host}:${port}/`;
+  try {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    let res;
+    try {
+      res = await fetch(url, { signal: controller.signal, redirect: "follow" });
+    } finally {
+      clearTimeout(timer);
+    }
+    if (!res.ok) return null;
+    const text = await res.text();
+    return text.includes("__DSH_BOOT__") ? url : null;
+  } catch {
+    return null;
+  }
+}
+
 /** 按命令行 LIKE 模式清扫残留的 node 进程（Windows，PowerShell）。 */
 function sweepKill(pattern) {
   if (!pattern || process.platform !== "win32") return;

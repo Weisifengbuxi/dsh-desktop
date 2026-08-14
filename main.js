@@ -4,7 +4,7 @@ import { app, BrowserWindow, Menu, dialog, shell } from "electron";
 import { fileURLToPath } from "node:url";
 import { dirname, join } from "node:path";
 import { existsSync, mkdirSync, readFileSync } from "node:fs";
-import { startDshServer, stopServer } from "./server.js";
+import { startDshServer, stopServer, detectExistingServer } from "./server.js";
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -103,11 +103,21 @@ async function main() {
   installMenu(logFile);
 
   try {
-    server = await startDshServer({
-      port: parsePort(),
-      logFile,
-      onLog: (line) => console.log("[dsh-server]", line),
-    });
+    // 复用检测：若 127.0.0.1:3080（或 DSH_PORT/--port 指定的端口）已有 dsh 在运行，
+    // 直接复用，绝不启动第二个实例 —— 两个实例并发写同一会话会把日志写坏（seq 撞号）。
+    const requestedPort = parsePort();
+    const probePort = requestedPort === "0" ? "3080" : requestedPort;
+    const existing = await detectExistingServer({ port: probePort });
+    if (existing) {
+      console.log("[dsh-desktop] 检测到已运行的 dsh 实例，直接复用:", existing);
+      server = { url: existing, child: null, stop: () => {}, reused: true };
+    } else {
+      server = await startDshServer({
+        port: requestedPort,
+        logFile,
+        onLog: (line) => console.log("[dsh-server]", line),
+      });
+    }
     appOrigin = new URL(server.url).origin;
     console.log("[dsh-desktop] server ready:", server.url);
     if (win && !win.isDestroyed()) {
@@ -124,15 +134,25 @@ async function main() {
 function shutdown() {
   if (shuttingDown) return;
   shuttingDown = true;
+  if (server?.reused) {
+    console.log("[dsh-desktop] 复用已有实例，不停止服务");
+    app.quit();
+    return;
+  }
   console.log("[dsh-desktop] shutdown → 停止服务进程");
   if (server) {
-    try {
-      server.stop();
-    } catch {
-      /* ignore */
-    }
+    // 稍等片刻让进行中的写入收尾，再结束进程树，降低会话日志损坏风险
+    setTimeout(() => {
+      try {
+        server.stop();
+      } catch {
+        /* ignore */
+      }
+      app.quit();
+    }, 500);
+  } else {
+    app.quit();
   }
-  app.quit();
 }
 
 app.on("before-quit", shutdown);
