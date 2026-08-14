@@ -1,0 +1,56 @@
+{
+  "name": "dsh-desktop",
+  "version": "0.1.0",
+  "description": "DeepSeek Harness 桌面应用外壳（DIY）：终端拉取源码，个性化应用名/图标/版本后自行构建",
+  "author": "dsh-desktop",
+  "license": "MIT",
+  "main": "main.js",
+  "type": "module",
+  "scripts": {
+    "start": "electron .",
+    "diy": "node scripts/diy.mjs",
+    "icon": "node scripts/make-icon.js",
+    "selftest": "node scripts/selftest.mjs",
+    "dist": "electron-builder --win",
+    "dist:portable": "electron-builder --win portable"
+  },
+  "build": {
+    "appId": "com.dsh.desktop",
+    "productName": "DeepSeek Harness",
+    "directories": {
+      "buildResources": "build",
+      "output": "release"
+    },
+    "files": [
+      "main.js",
+      "server.js",
+      "splash.html",
+      "package.json",
+      "build/icon.png",
+      "build/icon.ico"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "build/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "DeepSeek Harness"
+    }
+  },
+  "devDependencies": {
+    "electron": "^43.4.0",
+    "electron-builder": "^26.15.3"
+  }
+}
