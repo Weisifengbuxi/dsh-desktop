@@ -12,8 +12,9 @@
 //        —— 提供 ICO 时安装器优先使用它
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
-import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync } from "node:fs";
+import { readFileSync, writeFileSync, copyFileSync, existsSync, mkdirSync, rmSync } from "node:fs";
 import { dirname, join, resolve } from "node:path";
+import { tmpdir } from "node:os";
 import { fileURLToPath } from "node:url";
 import { spawnSync } from "node:child_process";
 
@@ -39,6 +40,37 @@ function getFlag(flag, argv) {
 function fail(message) {
   console.error(`\n✖ ${message}`);
   process.exit(1);
+}
+
+/** 弹出 Windows 文件选择框，返回选中的图标路径；取消返回空字符串。 */
+function pickIconFile() {
+  const script = `
+[Console]::OutputEncoding = [System.Text.Encoding]::UTF8
+Add-Type -AssemblyName System.Windows.Forms
+$d = New-Object System.Windows.Forms.OpenFileDialog
+$d.Filter = '图标文件 (*.png;*.ico)|*.png;*.ico|PNG 图片 (*.png)|*.png|ICO 图标 (*.ico)|*.ico'
+$d.Title = '选择应用图标（PNG 正方形 256~1024px，或含 256x256 的 ICO）'
+$d.InitialDirectory = [Environment]::GetFolderPath('Desktop')
+if ($d.ShowDialog() -eq [System.Windows.Forms.DialogResult]::OK) { Write-Output $d.FileName }
+`;
+  const tmp = join(tmpdir(), `dsh-diy-pick-${process.pid}.ps1`);
+  try {
+    writeFileSync(tmp, "\uFEFF" + script, "utf8");
+    const r = spawnSync("powershell", ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", tmp], {
+      encoding: "utf8",
+      timeout: 120_000,
+      windowsHide: true,
+    });
+    return r.stdout?.trim() || "";
+  } catch {
+    return "";
+  } finally {
+    try {
+      rmSync(tmp, { force: true });
+    } catch {
+      /* ignore */
+    }
+  }
 }
 
 /** 严格校验图标文件，返回 { kind: 'png'|'ico', source }，不满足要求直接抛错。 */
@@ -97,9 +129,10 @@ const name = flagName ?? ((await ask(`应用名（窗口标题 / 快捷方式名
 const version = flagVersion ?? ((await ask(`版本号（x.y.z）[${currentVersion}]: `)) || currentVersion);
 let iconInput = flagIcon;
 if (iconInput === undefined && interactive) {
-  iconInput = await ask(
-    "图标路径（PNG 正方形 256~1024px，或含 256×256 的 ICO；直接回车 = 保留/生成占位图标）: "
+  const ans = await ask(
+    "图标路径（直接回车 = 打开文件选择框；或直接输入路径；取消选择 = 保留占位图标）: "
   );
+  iconInput = ans || pickIconFile();
 }
 rl.close();
 

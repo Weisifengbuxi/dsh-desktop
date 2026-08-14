@@ -11,8 +11,8 @@
     "diy": "node scripts/diy.mjs",
     "icon": "node scripts/make-icon.js",
     "selftest": "node scripts/selftest.mjs",
-    "dist": "electron-builder --win",
-    "dist:portable": "electron-builder --win portable"
+    "dist": "node scripts/dist.mjs --win",
+    "dist:portable": "node scripts/dist.mjs --win portable"
   },
   "build": {
     "appId": "com.dsh.desktop",

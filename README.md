@@ -36,7 +36,10 @@ npm run diy
 - 会显示在：窗口标题栏、开始菜单/桌面快捷方式、安装包文件名、"关于"对话框
 - 支持中英文、空格
 
-**③ 图标路径** — **要求是严格的，报错中止即输入不符合要求**：
+**② 版本号** — 遵循 `x.y.z` 格式，例如 `1.0.0`
+- 会显示在"关于"对话框和安装包文件名
+
+**③ 图标路径** — **直接回车会弹出文件选择框**，选一张图片即可；也可以直接输入路径。**要求是严格的**，不符合会报错中止：
 
 | 格式 | 要求 | 用途 |
 |---|---|---|
@@ -44,8 +47,8 @@ npm run diy
 | **ICO** | 必须**包含至少一张 256×256** 的图像 | 安装器图标（提供 ICO 时优先使用） |
 
 - 只接受这两种格式，其他一律拒绝；
-- PNG 不是正方形、边长超出 256~1024、ICO 里没有大尺寸图像，向导都会报错并中止，
-- 如果不满意，重新运行 `npm run diy` 随时更换。
+- PNG 不是正方形、边长超出 256~1024、ICO 里没有大尺寸图像，向导都会报错并中止；
+- 在文件选择框里取消 = 保留占位图标；不满意可随时重跑 `npm run diy` 更换。
 
 也可以一行命令完成（适合脚本/CI）：
 >
@@ -68,6 +71,8 @@ npm run dist:portable  # 打包成便携版 exe（输出到 release/）
 ```
 
 装好后，桌面上就是你的专属应用：自己的名字、自己的图标、自己的版本号。
+
+> 💡 **国内网络下打包**：`npm run dist` 已内置 npmmirror 镜像（Electron 与打包工具自动走镜像下载，避免 GitHub 超时），无需额外配置；如需自定义镜像，设置环境变量 `ELECTRON_MIRROR` 与 `ELECTRON_BUILDER_BINARIES_MIRROR` 即可。
 
 ---
 
@@ -118,6 +123,7 @@ dsh-desktop/
 
 - **SmartScreen 提示"未知发布者"？** 项目未做代码签名，这是正常的，选择"仍要运行"即可。
 - **换图标/改名后没生效？** 重新执行 `npm run diy`，然后重新 `npm run dist` 打包。
+- **`npm start` 时任务栏/窗口图标不对？** 开发模式（npm start）下任务栏按钮显示的是 Electron 默认图标，这是正常现象；**打包安装后（npm run dist）的 exe 和快捷方式才是你的自定义图标**（已实测）。
 - **图标校验被拒？** 按上面的表格准备：PNG 务必正方形、512×512 最稳妥；在线生成 ICO 时选包含 256×256。
 - **首次启动要联网？** 是——npx 首次拉取 dsh 包需要网络，之后走本地缓存，离线也能启动。
 
@@ -134,7 +140,7 @@ app (name / version / icon), and build it — or just run it without packaging.
 **Install & personalize:**
 
 ```bash
-git clone <this repodsh-desktop
+git clone git@github.com:Weisifengbuxi/dsh-desktop.git
 cd dsh-desktop
 npm install
 npm run diy            # wizard: app name / version / icon
