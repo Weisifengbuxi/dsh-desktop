@@ -1,17 +1,17 @@
 # DeepSeek Harness Desktop（DSH 桌面应用 · DIY）
 
-> ### 你是否也遇到过这些场景？
->
-> - **网页上跑着 DSH，手一抖把浏览器标签关了**——服务跟着一起没了，会话状态得从头再来；
-> - **想用一次 DSH 太麻烦**——开终端、敲命令、等它打印 URL、再手动打开浏览器……折腾完就没兴致了；
-> - DSH 这么好用，**为什么不能像微信、VS Code 那样，双击图标就是一个应用**？
->
-> 现在可以了。**DeepSeek Harness Desktop** 把 DSH 的网页界面装进一个**独立的桌面应用窗口**：
-> 双击启动 → 自动在后台拉起本地服务 → 窗口直接打开界面；关闭窗口 → 服务自动停止，干净利落，
-> 再也不怕手滑关掉浏览器连服务一起没了。
->
-> 而且——**它是为你量身定做的（DIY）**。应用名、版本号、图标全由你决定，
-> 一条命令个性化，一条命令打包，出来的就是**你的专属 DSH 应用**，可以自己用，也可以分享给朋友。
+### 你是否也遇到过这些场景？
+
+- **网页上跑着 DSH，手一抖把浏览器标签关了**——服务跟着一起没了，会话状态得从头再来；
+- **想用一次 DSH 太麻烦**——开终端、敲命令、等它打印 URL、再手动打开浏览器……折腾完就没兴致了；
+- DSH 这么好用，**为什么不能像微信、VS Code 那样，双击图标就是一个应用**？
+
+现在可以了。**DeepSeek Harness Desktop** 把 DSH 的网页界面装进一个**独立的桌面应用窗口**：
+双击启动 → 自动在后台拉起本地服务 → 窗口直接打开界面；关闭窗口 → 服务自动停止
+再也不怕手滑关掉浏览器连服务一起没了。
+
+**支持diy**。应用名、图标全由你决定，
+一条命令个性化，一条命令打包，出来的就是**你的专属 DSH 应用**
 
 ---
 
@@ -20,7 +20,7 @@
 ### 第 1 步：终端拉取源码
 
 ```bash
-git clone <你的仓库地址> dsh-desktop
+git clone git@github.com:Weisifengbuxi/dsh-desktop.git
 cd dsh-desktop
 npm install
 ```
@@ -34,12 +34,9 @@ npm run diy
 
 **① 应用名** — 例如 `我的AI助手`、`My DSH`
 - 会显示在：窗口标题栏、开始菜单/桌面快捷方式、安装包文件名、"关于"对话框
-- 支持中文、英文、空格
+- 支持中英文、空格
 
-**② 版本号** — 遵循 `x.y.z` 格式，例如 `1.0.0`
-- 会显示在"关于"对话框和安装包文件名
-
-**③ 图标路径** — **要求是严格的，不符合会直接报错中止**：
+**③ 图标路径** — **要求是严格的，报错中止即输入不符合要求**：
 
 | 格式 | 要求 | 用途 |
 |---|---|---|
@@ -48,15 +45,13 @@ npm run diy
 
 - 只接受这两种格式，其他一律拒绝；
 - PNG 不是正方形、边长超出 256~1024、ICO 里没有大尺寸图像，向导都会报错并中止，
-  绝不会悄悄生成一个模糊变形的图标；
-- 直接回车 = 保留现有图标（没有则自动生成占位图标）；
-- 不满意？重新运行 `npm run diy` 随时更换。
+- 如果不满意，重新运行 `npm run diy` 随时更换。
 
-> 也可以一行命令完成（适合脚本/CI）：
+也可以一行命令完成（适合脚本/CI）：
 >
-> ```bash
-> npm run diy -- --name "My DSH" --version 1.0.0 --icon C:\path\icon.png
-> ```
+```bash
+npm run diy -- --name "My DSH" --version 1.0.0 --icon C:\path\icon.png
+```
 
 向导完成时会输出：
 
@@ -139,7 +134,7 @@ app (name / version / icon), and build it — or just run it without packaging.
 **Install & personalize:**
 
 ```bash
-git clone <this repo> dsh-desktop
+git clone <this repodsh-desktop
 cd dsh-desktop
 npm install
 npm run diy            # wizard: app name / version / icon
